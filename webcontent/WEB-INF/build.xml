@@ -1,0 +1,50 @@
+<project name="HelloWorldApp" default="deploy" basedir=".">
+    <!-- Set global properties for this build -->
+    <property name="src.dir"     value="src"/>
+    <property name="build.dir"   value="build"/>
+    <property name="web.dir"     value="WebContent"/>
+    <property name="dist.dir"    value="dist"/>
+    <property name="webinf.dir"  value="${web.dir}/WEB-INF"/>
+    <property name="classes.dir" value="${webinf.dir}/classes"/>
+    <property name="lib.dir"     value="${webinf.dir}/lib"/>
+    <property name="war.name"    value="HelloWorldApp.war"/>
+    
+    <!-- Clean build directory -->
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+    </target>
+
+    <!-- Compile the Java source files -->
+    <target name="compile">
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${classes.dir}">
+            <include name="**/*.java"/>
+        </javac>
+    </target>
+
+    <!-- Copy the web application files to the build directory -->
+    <target name="copy">
+        <mkdir dir="${build.dir}"/>
+        <copy todir="${build.dir}">
+            <fileset dir="${web.dir}" excludes="WEB-INF/lib/*.jar"/>
+        </copy>
+        <copy todir="${classes.dir}">
+            <fileset dir="${src.dir}" includes="**/*.properties"/>
+        </copy>
+    </target>
+
+    <!-- Create the WAR file -->
+    <target name="war" depends="compile, copy">
+        <mkdir dir="${dist.dir}"/>
+        <war destfile="${dist.dir}/${war.name}" webxml="${webinf.dir}/web.xml">
+            <fileset dir="${web.dir}"/>
+            <lib dir="${lib.dir}"/>
+        </war>
+    </target>
+
+    <!-- Deploy the WAR file to the local Tomcat server -->
+    <target name="deploy" depends="war">
+        <copy file="${dist.dir}/${war.name}" todir="${tomcat.home}/webapps"/>
+    </target>
+</project>
